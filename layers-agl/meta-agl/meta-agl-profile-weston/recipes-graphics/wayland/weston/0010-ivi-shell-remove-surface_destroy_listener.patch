@@ -1,0 +1,24 @@
+index e797e4f9..5f64e72d 100644
+--- a/ivi-shell/ivi-shell.c
++++ b/ivi-shell/ivi-shell.c
+@@ -162,6 +162,10 @@ layout_surface_cleanup(struct ivi_shell_surface *ivisurf)
+ {
+ 	assert(ivisurf->layout_surface != NULL);
+ 
++	/* destroy weston_surface destroy signal. */
++	if (!ivisurf->layout_surface->weston_desktop_surface)
++		wl_list_remove(&ivisurf->surface_destroy_listener.link);
++
+ 	ivi_layout_surface_destroy(ivisurf->layout_surface);
+ 	ivisurf->layout_surface = NULL;
+ 
+@@ -169,9 +173,6 @@ layout_surface_cleanup(struct ivi_shell_surface *ivisurf)
+ 	ivisurf->surface->committed_private = NULL;
+ 	weston_surface_set_label_func(ivisurf->surface, NULL);
+ 	ivisurf->surface = NULL;
+-
+-	// destroy weston_surface destroy signal.
+-	wl_list_remove(&ivisurf->surface_destroy_listener.link);
+ }
+ 
+ /*

@@ -1,0 +1,24 @@
+Description: make install must not strip binaries
+
+--- a/lib/Makefile.in
++++ b/lib/Makefile.in
+@@ -20,7 +20,7 @@ SHELL           = @SHELL@
+ 
+ ### Installation programs and flags
+ INSTALL		= @INSTALL@
+-INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
++INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+ INSTALL_DATA	= @INSTALL_DATA@
+ LN_S		= @LN_S@
+ MKDIR		= @MKDIR@
+--- a/libtar/Makefile.in
++++ b/libtar/Makefile.in
+@@ -20,7 +20,7 @@ SHELL           = @SHELL@
+ 
+ ### Installation programs and flags
+ INSTALL		= @INSTALL@
+-INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
++INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+ INSTALL_DATA	= @INSTALL_DATA@
+ LN_S		= @LN_S@
+ MKDIR		= @MKDIR@

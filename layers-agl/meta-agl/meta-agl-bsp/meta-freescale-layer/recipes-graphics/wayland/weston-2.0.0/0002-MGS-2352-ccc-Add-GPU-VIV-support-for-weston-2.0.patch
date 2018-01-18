@@ -1,0 +1,87 @@
+From ca6720b1c19f1581112e6ee371dff6d06aeae569 Mon Sep 17 00:00:00 2001
+From: Meng Mingming <mingming.meng@nxp.com>
+Date: Mon, 9 Jan 2017 15:04:27 +0800
+Subject: [PATCH 2/5] MGS-2352 [#ccc] Add GPU-VIV support for weston 2.0
+
+Add GPU-VIV support for weston 2.0
+
+Upstream Status: Inappropriate [i.MX specific]
+
+Date: Jan 09, 2017
+
+* Weston 2.0
+This requires re-enabling the EGL initialization support
+in the fbdev-backend.
+
+Signed-off-by: Meng Mingming <mingming.meng@nxp.com>
+Signed-off-by: Georgi Vlaev <georgi.vlaev@konsulko.com>
+---
+ libweston/compositor-fbdev.c | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index 4ca53b67..f87fccac 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -62,6 +62,7 @@ struct fbdev_backend {
+ 	int use_pixman;
+ 	uint32_t output_transform;
+ 	struct wl_listener session_listener;
++	NativeDisplayType display;
+ };
+ 
+ struct fbdev_screeninfo {
+@@ -94,6 +95,9 @@ struct fbdev_output {
+ 	/* pixman details. */
+ 	pixman_image_t *hw_surface;
+ 	uint8_t depth;
++
++	NativeDisplayType display;
++	NativeWindowType  window;
+ };
+ 
+ struct gl_renderer_interface *gl_renderer;
+@@ -444,6 +448,10 @@ fbdev_frame_buffer_destroy(struct fbdev_output *output)
+ 		           strerror(errno));
+ 
+ 	output->fb = NULL;
++	if(output->window)
++		fbDestroyWindow(output->window);
++	if(output->display)
++		fbDestroyDisplay(output->display);
+ }
+ 
+ static void fbdev_output_destroy(struct weston_output *base);
+@@ -480,8 +488,13 @@ fbdev_output_enable(struct weston_output *base)
+ 			goto out_hw_surface;
+ 	} else {
+ 		setenv("HYBRIS_EGLPLATFORM", "wayland", 1);
++		output->window = fbCreateWindow(backend->display, -1, -1, 0, 0);
++		if (output->window == NULL) {
++			fprintf(stderr, "failed to create window\n");
++			return 0;
++		}
+ 		if (gl_renderer->output_window_create(&output->base,
+-						(EGLNativeWindowType)NULL, NULL,
++						(EGLNativeWindowType)output->window, NULL,
+ 						gl_renderer->opaque_attribs,
+ 						NULL, 0) < 0) {
+ 			weston_log("gl_renderer_output_create failed.\n");
+@@ -808,8 +821,13 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 			goto out_launcher;
+ 		}
+ 
++		backend->display = fbGetDisplay(backend->compositor->wl_display);
++		if (backend->display == NULL) {
++			weston_log("fbGetDisplay failed.\n");
++			goto out_launcher;
++		}
+ 		if (gl_renderer->display_create(compositor, NO_EGL_PLATFORM,
+-					EGL_DEFAULT_DISPLAY,
++					backend->display,
+ 					NULL,
+ 					gl_renderer->opaque_attribs,
+ 					NULL, 0) < 0) {
+-- 
+2.11.0
+

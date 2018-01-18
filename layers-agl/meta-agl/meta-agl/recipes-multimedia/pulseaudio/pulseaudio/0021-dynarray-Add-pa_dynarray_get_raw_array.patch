@@ -1,0 +1,21 @@
+--- a/src/pulsecore/dynarray.c	2016-04-13 16:25:38.628016119 +0200
++++ b/src/pulsecore/dynarray.c	2016-04-13 16:26:54.694015992 +0200
+@@ -91,3 +91,9 @@
+ 
+     return array->n_entries;
+ }
++
++void * const *pa_dynarray_get_raw_array(pa_dynarray *array) {
++    pa_assert(array);
++
++    return array->data;
++}
+--- a/src/pulsecore/dynarray.h	2016-04-13 16:25:43.225016112 +0200
++++ b/src/pulsecore/dynarray.h	2016-04-13 16:27:47.414015904 +0200
+@@ -52,5 +52,5 @@
+ void *pa_dynarray_steal_last(pa_dynarray *array);
+ 
+ unsigned pa_dynarray_size(pa_dynarray *array);
+-
++void * const *pa_dynarray_get_raw_array(pa_dynarray *array);
+ #endif

@@ -1,0 +1,17 @@
+Common targets are:
+  - meta-agl:          (core system)
+    agl-image-minimal
+    agl-image-minimal-qa
+    
+    agl-image-ivi
+    agl-image-ivi-qa
+    agl-image-ivi-crosssdk
+    
+    agl-image-weston
+
+  - meta-agl-demo:     (demo with UI)
+    agl-demo-platform  (* default demo target)
+    agl-demo-platform-qa
+    agl-demo-platform-crosssdk
+    
+    agl-demo-platform-html5

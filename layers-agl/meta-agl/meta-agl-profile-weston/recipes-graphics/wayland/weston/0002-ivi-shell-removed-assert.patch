@@ -1,0 +1,11 @@
+index e9ddf9a4..f3156d35 100644
+--- a/ivi-shell/ivi-shell.c
++++ b/ivi-shell/ivi-shell.c
+@@ -114,7 +114,6 @@ shell_surface_send_configure(struct weston_surface *surface,
+ 	struct ivi_shell_surface *shsurf;
+ 
+ 	shsurf = get_ivi_shell_surface(surface);
+-	assert(shsurf);
+ 	if (!shsurf)
+ 		return;
+ 

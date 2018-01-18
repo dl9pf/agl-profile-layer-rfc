@@ -1,0 +1,53 @@
+--- a/Makefile.am	2016-04-12 11:28:10.832997230 +0200
++++ b/Makefile.am	2016-04-12 11:32:41.868996777 +0200
+@@ -49,7 +49,13 @@
+ 		vala/libpulse-simple.deps vala/libpulse-simple.vapi
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+-pkgconfig_DATA = libpulse.pc libpulse-simple.pc
++pkgconfig_DATA = libpulse.pc libpulse-simple.pc pulseaudio-module-devel.pc
++
++moduledev_DATA = pulsecore-config.h $(top_srcdir)/src/pulsecore/*.h
++moduledevdir = $(includedir)/pulsemodule/pulsecore
++
++moduledevinternal_DATA = src/pulse/internal.h src/pulse/client-conf.h src/pulse/fork-detect.h 
++moduledevinternaldir = $(includedir)/pulsemodule/pulse
+ 
+ if HAVE_GLIB20
+ pkgconfig_DATA += \
+@@ -103,6 +109,9 @@
+ check-daemon:
+ 	$(MAKE) -C src check-daemon
+ 
++pulsecore-config.h: config.h
++	cp $< $@
++
+ .PHONY: homepage distcleancheck doxygen
+ 
+ # see git-version-gen
+--- a/configure.ac	2016-04-12 11:34:10.605996629 +0200
++++ b/configure.ac	2016-04-12 11:37:43.502996274 +0200
+@@ -1464,6 +1464,7 @@
+ man/default.pa.5.xml
+ man/pulse-cli-syntax.5.xml
+ man/start-pulseaudio-x11.1.xml
++pulseaudio-module-devel.pc
+ ])
+ 
+ AC_CONFIG_FILES([src/esdcompat:src/daemon/esdcompat.in], [chmod +x src/esdcompat])
+--- /dev/null	2016-03-15 16:08:23.302999643 +0100
++++ b/pulseaudio-module-devel.pc.in	2016-03-17 16:16:58.427977484 +0100
+@@ -0,0 +1,12 @@
++prefix=@prefix@
++exec_prefix=@exec_prefix@
++libdir=@libdir@
++includedir=@includedir@
++modlibexecdir=@modlibexecdir@
++
++Name: pulseaudio-module-devel
++Description: PulseAudio Module Development Interface
++Version: @PACKAGE_VERSION@
++Libs: -L${libdir} -L${libdir}/pulseaudio -L${modlibexecdir} -lpulsecommon-@PA_MAJORMINOR@ -lpulsecore-@PA_MAJORMINOR@ -lprotocol-native
++Libs.private:
++Cflags: -I${includedir}/pulsemodule -D_REENTRANT
+

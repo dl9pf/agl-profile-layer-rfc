@@ -1,0 +1,29 @@
+From df4f5ccc376a630b1a587a8ca3b1f35a305867dd Mon Sep 17 00:00:00 2001
+From: Robert Berger <robert.berger@ReliableEmbeddedSystems.com>
+Date: Wed, 23 Aug 2017 07:19:03 +0000
+Subject: [PATCH] autoopts/mk-tpl-config.sh: fix shell path
+
+POSIX_SHELL as shebang doesn't work when it is longer than
+BINPRM_BUF_SIZE which is 128 usually. So use "/bin/sh".
+
+Signed-off-by: Robert Berger <robert.berger@ReliableEmbeddedSystems.com>
+---
+ autoopts/mk-tpl-config.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/autoopts/mk-tpl-config.sh b/autoopts/mk-tpl-config.sh
+index c4708a2..550870e 100755
+--- a/autoopts/mk-tpl-config.sh
++++ b/autoopts/mk-tpl-config.sh
+@@ -102,7 +102,7 @@ fix_scripts() {
+                  sed 1d $f
+                  ;;
+ 
+-        */sh )   echo '#!' ${POSIX_SHELL}
++        */sh )   echo '#!/bin/sh'
+                  sed 1d $f
+                  ;;
+ 
+-- 
+2.7.4
+

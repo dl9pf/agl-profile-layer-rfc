@@ -1,0 +1,11 @@
+--- pulseaudio-9.0/src/daemon/default.pa.in.orig	2017-05-17 17:26:20.415369638 +0000
++++ pulseaudio-9.0/src/daemon/default.pa.in	2017-05-17 17:26:49.995316383 +0000
+@@ -82,7 +82,7 @@
+ .endif
+ 
+ .ifexists module-bluetooth-discover@PA_SOEXT@
+-load-module module-bluetooth-discover
++load-module module-bluetooth-discover headset=ofono
+ .endif
+ ])dnl
+ 

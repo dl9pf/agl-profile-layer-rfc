@@ -1,0 +1,13 @@
+[Unit]
+Description=Rygel
+After=lightmediascanner.service
+Requires=lightmediascanner.service
+
+[Service]
+Type=dbus
+BusName=org.gnome.Rygel1
+ExecStart=/usr/bin/rygel -c /etc/rygel.conf
+
+[Install]
+WantedBy=default.target
+Alias=dbus-org.gnome.Rygel1.service

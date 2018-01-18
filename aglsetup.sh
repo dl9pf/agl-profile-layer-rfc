@@ -1,0 +1,1 @@
+/home/dl9pf/user/git/LF/AGL/AGL-distro-profile-redone/layers-agl/meta-agl/scripts/aglsetup.sh

@@ -1,0 +1,9 @@
+[Unit]
+Description=blsched big.LITTLE cpu manager service
+After=local-fs.target
+
+[Service]
+ExecStart=@SBINDIR@/blsched @ARGS@
+
+[Install]
+WantedBy=multi-user.target

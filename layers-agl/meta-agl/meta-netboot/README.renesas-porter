@@ -1,0 +1,41 @@
+Below are the environment variables that can be set in the u-boot console to boot the porter board in various configurations
+
+################## Common options #####################
+# these options are common to all configurations:
+
+setenv 'bootkfile' 'uImage+dtb'
+setenv 'bootkaddr' '0x40007fc0'
+
+setenv 'bootifile' 'initramfs-netboot-image-porter.ext4.gz.u-boot'
+setenv 'bootiaddr' '0x50000000'
+
+setenv 'bootargs_console' 'console=ttySC6,38400 ignore_loglevel'
+setenv 'bootargs_video' 'vmalloc=384M video=HDMI-A-1:1280x960-32@60'
+setenv 'bootargs_extra' 'rw rootfstype=ext4 rootwait rootdelay=2'
+
+################ Boot on MMC (SDcard) #################
+
+setenv 'bootargs_root' 'root=/dev/mmcblk0p1'
+setenv 'bootmmc' '1:1'
+setenv 'bootkload_sd' 'ext4load mmc ${bootmmc} ${bootkaddr} boot/${bootkfile}'
+setenv 'bootcmd' 'setenv bootargs ${bootargs_console} ${bootargs_video} ${bootargs_root} ${bootargs_extra}; run bootkload_sd; bootm ${bootkaddr}'
+
+################ Boot on MMC (SDcard) with initrd ######
+
+setenv 'bootargs_root' 'root=/dev/ram0 ramdisk_size=16384'
+setenv 'bootmmc' '1:1'
+setenv 'bootkload_sd' 'ext4load mmc ${bootmmc} ${bootkaddr} boot/${bootkfile}'
+setenv 'bootiload_sd' 'ext4load mmc ${bootmmc} ${bootiaddr} boot/${bootifile}'
+setenv 'bootcmd' 'setenv bootargs ${bootargs_console} ${bootargs_video} ${bootargs_root} ${bootargs_extra}; run bootkload_sd; run bootiload_sd; bootm ${bootkaddr} ${bootiaddr}'
+
+################ Netboot through TFTP+NBD ##################
+# replace <IP> addresses by appropriate addresses
+
+setenv 'ipaddr' '<board_IP>'
+setenv 'serverip' '<server_IP>'
+
+setenv 'bootargs_root' 'root=/dev/ram0 ramdisk_size=16384 ip=dhcp'
+setenv 'bootkload_net' 'tftp ${bootkaddr} porter/${bootkfile}'
+setenv 'bootiload_net' 'tftp ${bootiaddr} porter/${bootifile}'
+setenv 'bootcmd' 'setenv bootargs ${bootargs_console} ${bootargs_video} ${bootargs_root} ${bootargs_extra} nbd.server=${serverip}; run bootkload_net; run bootiload_net; bootm ${bootkaddr} ${bootiaddr}'
+

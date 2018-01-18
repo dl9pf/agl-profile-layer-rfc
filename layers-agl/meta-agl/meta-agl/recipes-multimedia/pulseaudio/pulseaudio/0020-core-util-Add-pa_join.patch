@@ -1,0 +1,37 @@
+--- a/src/pulsecore/core-util.c	2016-04-13 16:17:33.314016929 +0200
++++ b/src/pulsecore/core-util.c	2016-04-13 16:18:31.186016833 +0200
+@@ -1104,6 +1104,24 @@
+     return pa_xstrndup(current, l);
+ }
+ 
++char *pa_join(const char * const *strings, unsigned n_strings, const char *delimiter) {
++    pa_strbuf *buf;
++    unsigned i;
++
++    pa_assert(strings || n_strings == 0);
++
++    buf = pa_strbuf_new();
++
++    for (i = 0; i < n_strings; i++) {
++        if (i > 0 && delimiter)
++            pa_strbuf_puts(buf, delimiter);
++
++        pa_strbuf_puts(buf, strings[i]);
++    }
++
++    return pa_strbuf_tostring_free(buf);
++}
++
+ PA_STATIC_TLS_DECLARE(signame, pa_xfree);
+ 
+ /* Return the name of an UNIX signal. Similar to Solaris sig2str() */
+--- a/src/pulsecore/core-util.h	2016-04-13 16:17:39.177016919 +0200
++++ b/src/pulsecore/core-util.h	2016-04-13 16:19:09.141016769 +0200
+@@ -108,6 +108,7 @@
+ char *pa_split(const char *c, const char*delimiters, const char **state);
+ const char *pa_split_in_place(const char *c, const char*delimiters, int *n, const char **state);
+ char *pa_split_spaces(const char *c, const char **state);
++char *pa_join(const char * const *strings, unsigned n_strings, const char *delimiter);
+ 
+ char *pa_strip_nl(char *s);
+ char *pa_strip(char *s);

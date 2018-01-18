@@ -1,0 +1,32 @@
+diff -urN /tmp/ft2demos-2.6.orig/Makefile /tmp/ft2demos-2.6/Makefile
+--- ft2demos-2.6.orig/Makefile	2015-06-07 07:34:19.000000000 +0000
++++ ft2demos-2.6/Makefile	2016-06-17 14:25:37.640456725 +0000
+@@ -153,7 +153,8 @@
+ 
+   ifeq ($(PLATFORM),unix)
+     CC        = $(CCraw)
+-    LINK_CMD  = $(subst /,$(SEP),$(OBJ_BUILD)/libtool) \
++	LIBTOOL   = $(OBJ_BUILD)/libtool
++    LINK_CMD  = $(subst /,$(SEP),$(LIBTOOL)) \
+                 --mode=link $(CC) \
+                 $(subst /,$(COMPILER_SEP),$(LDFLAGS))
+     LINK_LIBS = $(subst /,$(COMPILER_SEP),$(FTLIB) $(EFENCE))
+@@ -279,12 +280,12 @@
+           ttdebug
+ 
+   # Comment out the next line if you don't have a graphics subsystem.
+-  EXES += ftdiff   \
+-          ftgamma  \
+-          ftgrid   \
+-          ftmulti  \
+-          ftstring \
+-          ftview
++  # EXES += ftdiff   \
++  #         ftgamma  \
++  #         ftgrid   \
++  #         ftmulti  \
++  #         ftstring \
++  #         ftview
+ 
+   # ftvalid requires ftgxval.c and ftotval.c
+   #

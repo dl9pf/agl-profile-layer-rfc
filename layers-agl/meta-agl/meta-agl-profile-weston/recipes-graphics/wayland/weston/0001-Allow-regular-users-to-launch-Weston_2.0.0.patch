@@ -1,0 +1,46 @@
+From 6c145cea35f0b77613d6e3f48679c976b9839d7c Mon Sep 17 00:00:00 2001
+From: Ronan Le Martret <ronan.lemartret@iot.bzh>
+Date: Wed, 31 May 2017 22:48:18 +0000
+Subject: [PATCH] Allow regular users to launch Weston
+
+Signed-off-by: Ronan Le Martret <ronan.lemartret@iot.bzh>
+---
+ configure.ac                | 6 ++++++
+ libweston/launcher-direct.c | 2 ++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index 7e84c14..8b3e17e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -155,6 +155,12 @@ if test x$enable_xkbcommon = xyes; then
+                           true)
+ fi
+ 
++AC_ARG_ENABLE(sys-uid, [  --enable-sys-uid],,
++              enable_sys_uid=no)
++if test x$enable_sys_uid = xyes; then
++	AC_DEFINE(ENABLE_SYS_UID, [1], [Allow regular users to launch Weston])
++fi
++
+ AC_ARG_ENABLE(setuid-install, [  --enable-setuid-install],,
+ 	      enable_setuid_install=yes)
+ AM_CONDITIONAL(ENABLE_SETUID_INSTALL, test x$enable_setuid_install = xyes)
+diff --git a/libweston/launcher-direct.c b/libweston/launcher-direct.c
+index 4fc1c3c..8f16a69 100644
+--- a/libweston/launcher-direct.c
++++ b/libweston/launcher-direct.c
+@@ -275,8 +275,10 @@ launcher_direct_connect(struct weston_launcher **out, struct weston_compositor *
+ {
+ 	struct launcher_direct *launcher;
+ 
++#ifndef ENABLE_SYS_UID
+ 	if (geteuid() != 0)
+ 		return -EINVAL;
++#endif
+ 
+ 	launcher = zalloc(sizeof(*launcher));
+ 	if (launcher == NULL)
+-- 
+2.7.4
+

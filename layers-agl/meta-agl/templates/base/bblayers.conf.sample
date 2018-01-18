@@ -1,0 +1,57 @@
+# LAYER_CONF_VERSION is increased each time build/conf/bblayers.conf
+# changes incompatibly
+LCONF_VERSION = "6"
+
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
+
+# Convenience variables usable in various configuration fragments
+#----------------------------------
+BCONFDIR := "${@os.path.abspath(os.path.dirname(d.getVar('FILE', True)))}"
+METADIR  := "${@os.path.abspath('##OEROOT##/../../')}"
+
+# These are the core OE + YP Layers
+#----------------------------------
+YOCTO_LAYERS = " \
+  ${METADIR}/layers-upstream/poky/meta \
+  ${METADIR}/layers-upstream/poky/meta-poky \
+  "
+#  this is added for the boards where necessary, not globally
+#  ${METADIR}/layers-upstream/poky/meta-yocto-bsp \
+#
+# These are the AGL CORE Layers that make up the basis
+# - they create a minimal bootable filesystem
+#   with some automotive tools/libraries
+#-----------------------------------------------------
+AGL_CORE_LAYERS = " \
+  ${METADIR}/layers-agl/meta-agl/meta-agl \
+  ${METADIR}/layers-agl/meta-agl/meta-agl-distro \
+  ${METADIR}/layers-agl/meta-agl/meta-agl-bsp \
+  ${METADIR}/layers-agl/meta-agl/meta-agl-profile-apis \
+  "
+
+# FIXME: CHECK !
+# These are the direct dependencies of the AGL CORE Layers
+#---------------------------------------------------------
+AGL_CORE_DEPENDENCY_LAYERS = " \
+  ${METADIR}/layers-upstream/meta-openembedded/meta-oe \
+  ${METADIR}/layers-upstream/meta-openembedded/meta-multimedia \
+  ${METADIR}/layers-upstream/meta-openembedded/meta-efl \
+  ${METADIR}/layers-upstream/meta-openembedded/meta-networking \
+  ${METADIR}/layers-upstream/meta-openembedded/meta-python \
+  ${METADIR}/layers-upstream/meta-openembedded/meta-filesystems \
+  "
+
+####################
+# Combine the layers
+BBLAYERS ?= " \
+  ${AGL_CORE_DEPENDENCY_LAYERS} \
+  ${AGL_CORE_LAYERS} \
+  ${YOCTO_LAYERS} \
+  "
+
+BBLAYERS_NON_REMOVABLE ?= " \
+  ${METADIR}/layers-upstream/poky/meta \
+  ${METADIR}/layers-upstream/poky/meta-poky \
+  ${METADIR}/layers-agl/meta-agl/meta-agl \
+  "

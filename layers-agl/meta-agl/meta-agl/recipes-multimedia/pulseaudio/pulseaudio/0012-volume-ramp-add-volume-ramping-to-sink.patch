@@ -1,0 +1,159 @@
+--- a/src/pulsecore/sink.c	2016-04-12 18:01:23.403957855 +0200
++++ b/src/pulsecore/sink.c	2016-04-12 18:44:49.677953506 +0200
+@@ -324,6 +324,8 @@
+             &s->sample_spec,
+             0);
+ 
++    pa_cvolume_ramp_int_init(&s->ramp, PA_VOLUME_NORM, data->sample_spec.channels);
++
+     s->thread_info.rtpoll = NULL;
+     s->thread_info.inputs = pa_hashmap_new_full(pa_idxset_trivial_hash_func, pa_idxset_trivial_compare_func, NULL,
+                                                 (pa_free_cb_t) pa_sink_input_unref);
+@@ -347,6 +349,8 @@
+     s->thread_info.volume_change_extra_delay = core->deferred_volume_extra_delay_usec;
+     s->thread_info.latency_offset = s->latency_offset;
+ 
++    s->thread_info.ramp = s->ramp;
++
+     /* FIXME: This should probably be moved to pa_sink_put() */
+     pa_assert_se(pa_idxset_put(core->sinks, s, &s->index) >= 0);
+ 
+@@ -1182,6 +1186,7 @@
+ 
+     } else if (n == 1) {
+         pa_cvolume volume;
++        pa_cvolume target;
+ 
+         *result = info[0].chunk;
+         pa_memblock_ref(result->memblock);
+@@ -1198,9 +1203,20 @@
+                                     result,
+                                     &s->sample_spec,
+                                     result->length);
+-        } else if (!pa_cvolume_is_norm(&volume)) {
++        } else if (!pa_cvolume_is_norm(&volume) || pa_cvolume_ramp_target_active(&s->thread_info.ramp) || pa_cvolume_ramp_active(&s->thread_info.ramp)) {
+             pa_memchunk_make_writable(result, 0);
+-            pa_volume_memchunk(result, &s->sample_spec, &volume);
++            if (!pa_cvolume_ramp_active(&s->thread_info.ramp)) {
++                if (!pa_cvolume_is_norm(&volume))
++                    pa_volume_memchunk(result, &s->sample_spec, &volume);
++                pa_volume_ramp_memchunk(result, &s->sample_spec, &(s->thread_info.ramp));
++            }
++            else {
++                if (pa_cvolume_ramp_target_active(&s->thread_info.ramp)) {
++                    pa_cvolume_ramp_get_targets(&s->thread_info.ramp, &target);
++                    pa_sw_cvolume_multiply(&volume, &volume, &target);
++                }
++                pa_volume_memchunk(result, &s->sample_spec, &volume);
++            }
+         }
+     } else {
+         void *ptr;
+@@ -1290,6 +1306,7 @@
+ 
+     } else {
+         void *ptr;
++        pa_cvolume target_vol;
+ 
+         ptr = pa_memblock_acquire(target->memblock);
+ 
+@@ -1299,6 +1316,15 @@
+                                 &s->thread_info.soft_volume,
+                                 s->thread_info.soft_muted);
+ 
++        if (pa_cvolume_ramp_target_active(&s->thread_info.ramp) || pa_cvolume_ramp_active(&s->thread_info.ramp)) {
++            if (pa_cvolume_ramp_active(&s->thread_info.ramp))
++                pa_volume_ramp_memchunk(target, &s->sample_spec, &(s->thread_info.ramp));
++            else {
++                pa_cvolume_ramp_get_targets(&s->thread_info.ramp, &target_vol);
++                pa_volume_memchunk(target, &s->sample_spec, &target_vol);
++            }
++        }
++
+         pa_memblock_release(target->memblock);
+     }
+ 
+@@ -2058,6 +2084,32 @@
+         pa_assert_se(pa_asyncmsgq_send(root_sink->asyncmsgq, PA_MSGOBJECT(root_sink), PA_SINK_MESSAGE_SET_SHARED_VOLUME, NULL, 0, NULL) == 0);
+ }
+ 
++/* Called from main thread */
++void pa_sink_set_volume_ramp(
++        pa_sink *s,
++        const pa_cvolume_ramp *ramp,
++        bool send_msg,
++        bool save) {
++
++    pa_sink_assert_ref(s);
++    pa_assert_ctl_context();
++    pa_assert(PA_SINK_IS_LINKED(s->state));
++    pa_assert(ramp);
++
++    /* make sure we don't change the volume when a PASSTHROUGH input is connected ...
++     * ... *except* if we're being invoked to reset the volume to ensure 0 dB gain */
++    if (pa_sink_is_passthrough(s)) {
++        pa_log_warn("Cannot do volume ramp, Sink is connected to PASSTHROUGH input");
++        return;
++    }
++
++    pa_cvolume_ramp_convert(ramp, &s->ramp, s->sample_spec.rate);
++
++    /* This tells the sink that volume ramp changed */
++    if (send_msg)
++        pa_assert_se(pa_asyncmsgq_send(s->asyncmsgq, PA_MSGOBJECT(s), PA_SINK_MESSAGE_SET_VOLUME_RAMP, NULL, 0, NULL) == 0);
++}
++
+ /* Called from the io thread if sync volume is used, otherwise from the main thread.
+  * Only to be called by sink implementor */
+ void pa_sink_set_soft_volume(pa_sink *s, const pa_cvolume *volume) {
+@@ -2713,6 +2765,12 @@
+             sync_input_volumes_within_thread(s);
+             return 0;
+ 
++        case PA_SINK_MESSAGE_SET_VOLUME_RAMP:
++            /* if we have ongoing ramp where we take current start values */
++            pa_cvolume_ramp_start_from(&s->thread_info.ramp, &s->ramp);
++            s->thread_info.ramp = s->ramp;
++            return 0;
++
+         case PA_SINK_MESSAGE_GET_VOLUME:
+ 
+             if ((s->flags & PA_SINK_DEFERRED_VOLUME) && s->get_volume) {
+--- a/src/pulsecore/sink.h	2016-04-12 18:01:42.117957824 +0200
++++ b/src/pulsecore/sink.h	2016-04-12 18:23:29.394955642 +0200
+@@ -105,6 +105,9 @@
+     pa_cvolume saved_volume;
+     bool saved_save_volume:1;
+ 
++    /* for volume ramps */
++    pa_cvolume_ramp_int ramp;
++
+     pa_asyncmsgq *asyncmsgq;
+ 
+     pa_memchunk silence;
+@@ -300,6 +303,8 @@
+         uint32_t volume_change_safety_margin;
+         /* Usec delay added to all volume change events, may be negative. */
+         int32_t volume_change_extra_delay;
++
++        pa_cvolume_ramp_int ramp;
+     } thread_info;
+ 
+     void *userdata;
+@@ -333,6 +338,7 @@
+     PA_SINK_MESSAGE_SET_MAX_REQUEST,
+     PA_SINK_MESSAGE_SET_PORT,
+     PA_SINK_MESSAGE_UPDATE_VOLUME_AND_MUTE,
++    PA_SINK_MESSAGE_SET_VOLUME_RAMP,
+     PA_SINK_MESSAGE_SET_LATENCY_OFFSET,
+     PA_SINK_MESSAGE_MAX
+ } pa_sink_message_t;
+@@ -453,6 +459,8 @@
+ void pa_sink_set_mute(pa_sink *sink, bool mute, bool save);
+ bool pa_sink_get_mute(pa_sink *sink, bool force_refresh);
+ 
++void pa_sink_set_volume_ramp(pa_sink *s, const pa_cvolume_ramp *ramp, bool send_msg, bool save); 
++
+ bool pa_sink_update_proplist(pa_sink *s, pa_update_mode_t mode, pa_proplist *p);
+ 
+ int pa_sink_set_port(pa_sink *s, const char *name, bool save);

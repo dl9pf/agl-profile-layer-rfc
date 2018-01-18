@@ -1,0 +1,30 @@
+diff --git a/arch/arm64/boot/dts/renesas/r8a7796-m3ulcb.dts b/arch/arm64/boot/dts/renesas/r8a7796-m3ulcb.dts
+index a1f3c244b83e..b08e94430bea 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7796-m3ulcb.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7796-m3ulcb.dts
+@@ -49,6 +49,13 @@
+ 			reg = <0x00000000 0x54000000 0x0 0x03000000>;
+ 		};
+ 
++		/* For Audio DSP */
++		adsp_reserved: linux,adsp {
++			compatible = "shared-dma-pool";
++			reusable;
++			reg = <0x00000000 0x57000000 0x0 0x01000000>;
++		};
++
+ 		/* global autoconfigured region for contiguous allocations */
+ 		linux,cma {
+ 			compatible = "shared-dma-pool";
+@@ -388,6 +395,11 @@
+ 	status = "okay";
+ };
+ 
++&adsp {
++	status = "okay";
++	memory-region = <&adsp_reserved>;
++};
++
+ &scif2 {
+ 	pinctrl-0 = <&scif2_pins>;
+ 	pinctrl-names = "default";

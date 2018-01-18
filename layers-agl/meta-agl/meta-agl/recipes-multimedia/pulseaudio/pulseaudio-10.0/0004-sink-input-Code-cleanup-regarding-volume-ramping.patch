@@ -1,0 +1,62 @@
+From 49d8943b151a73be3dd726561a720c0f4bfdccac Mon Sep 17 00:00:00 2001
+From: Sangchul Lee <sangchul1011@gmail.com>
+Date: Sat, 27 Aug 2016 21:33:18 +0900
+Subject: [PATCH 4/6] sink-input: Code cleanup regarding volume ramping
+
+Remove unused parameter of pa_sink_input_set_volume_ramp().
+Use bool instead of pa_bool_t.
+
+Signed-off-by: Sangchul Lee <sc11.lee@samsung.com>
+---
+ src/pulsecore/sink-input.c | 7 ++-----
+ src/pulsecore/sink-input.h | 2 +-
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/src/pulsecore/sink-input.c b/src/pulsecore/sink-input.c
+index cc8953f..e1968e0 100644
+--- a/src/pulsecore/sink-input.c
++++ b/src/pulsecore/sink-input.c
+@@ -931,7 +931,6 @@ void pa_sink_input_peek(pa_sink_input *i, size_t slength /* in sink bytes */, pa
+             pa_memchunk wchunk;
+             bool nvfs = need_volume_factor_sink;
+             pa_cvolume target;
+-            pa_bool_t tmp;
+ 
+             wchunk = tchunk;
+             pa_memblock_ref(wchunk.memblock);
+@@ -972,7 +971,7 @@ void pa_sink_input_peek(pa_sink_input *i, size_t slength /* in sink bytes */, pa
+                 if (pa_cvolume_ramp_active(&i->thread_info.ramp)) {
+                     pa_memchunk_make_writable(&wchunk, 0);
+                     pa_volume_ramp_memchunk(&wchunk, &i->sink->sample_spec, &(i->thread_info.ramp));
+-                } else if ((tmp = pa_cvolume_ramp_target_active(&(i->thread_info.ramp)))) {
++                } else if ((pa_cvolume_ramp_target_active(&(i->thread_info.ramp)))) {
+                     pa_memchunk_make_writable(&wchunk, 0);
+                     pa_cvolume_ramp_get_targets(&i->thread_info.ramp, &target);
+                     pa_volume_memchunk(&wchunk, &i->sink->sample_spec, &target);
+@@ -1372,9 +1371,7 @@ int pa_sink_input_remove_volume_factor(pa_sink_input *i, const char *key) {
+ void pa_sink_input_set_volume_ramp(
+         pa_sink_input *i,
+         const pa_cvolume_ramp *ramp,
+-        pa_bool_t send_msg,
+-        pa_bool_t save) {
+-
++        bool send_msg) {
+     pa_sink_input_assert_ref(i);
+     pa_assert_ctl_context();
+     pa_assert(PA_SINK_INPUT_IS_LINKED(i->state));
+diff --git a/src/pulsecore/sink-input.h b/src/pulsecore/sink-input.h
+index 6e1b211..92f61c3 100644
+--- a/src/pulsecore/sink-input.h
++++ b/src/pulsecore/sink-input.h
+@@ -378,7 +378,7 @@ void pa_sink_input_set_volume(pa_sink_input *i, const pa_cvolume *volume, bool s
+ void pa_sink_input_add_volume_factor(pa_sink_input *i, const char *key, const pa_cvolume *volume_factor);
+ int pa_sink_input_remove_volume_factor(pa_sink_input *i, const char *key);
+ pa_cvolume *pa_sink_input_get_volume(pa_sink_input *i, pa_cvolume *volume, bool absolute);
+-void pa_sink_input_set_volume_ramp(pa_sink_input *i, const pa_cvolume_ramp *ramp, pa_bool_t send_msg, pa_bool_t save);
++void pa_sink_input_set_volume_ramp(pa_sink_input *i, const pa_cvolume_ramp *ramp, bool send_msg);
+ 
+ void pa_sink_input_set_mute(pa_sink_input *i, bool mute, bool save);
+ 
+-- 
+1.9.1
+

@@ -1,0 +1,32 @@
+From 7691ebcf38c59332eb819f909250a22ba5e8e50b Mon Sep 17 00:00:00 2001
+From: Tom Rini <trini@konsulko.com>
+Date: Tue, 24 Oct 2017 12:01:51 -0400
+Subject: [PATCH 1/1] wand/api.py: Change search order
+
+In addition to specifying MAGICK_HOME to ensure that we will even look
+within our desired paths, we need to also check for the type of library
+that we know we have.  Otherwise we may find a different form of the
+library in one of the system paths before we try ours.
+
+Upstream-Status: Inappropriate [configuration]
+Signed-off-by: Tom Rini <trini@konsulko.com>
+---
+ wand/api.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/wand/api.py b/wand/api.py
+index 19cf6d2..dde9c5e 100644
+--- a/wand/api.py
++++ b/wand/api.py
+@@ -55,7 +55,7 @@ def library_paths():
+     """
+     libwand = None
+     libmagick = None
+-    versions = '', '-6', '-Q16', '-Q8', '-6.Q16'
++    versions = '-6.Q16', '-6', '-Q16', '-Q8', ''
+     options = '', 'HDRI', 'HDRI-2'
+     system = platform.system()
+     magick_home = os.environ.get('MAGICK_HOME')
+-- 
+2.11.0
+

@@ -1,0 +1,7 @@
+Environment="XDG_RUNTIME_DIR=@XDG_RUNTIME_DIR@"
+TTYPath=/dev/tty@WESTONTTY@
+StandardInput=tty
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+UtmpIdentifier=tty@WESTONTTY@

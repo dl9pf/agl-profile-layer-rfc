@@ -1,0 +1,12 @@
+[Unit]
+Description=Terminal for weston user
+After=user-config.service
+Requires=user-config.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/weston-terminal
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

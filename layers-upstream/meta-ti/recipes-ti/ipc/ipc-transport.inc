@@ -1,0 +1,15 @@
+LICENSE = "BSD-3-Clause"
+
+IPC_TRANSPORT_GIT_URI = "git://git.ti.com/keystone-linux/ipc-transport.git"
+IPC_TRANSPORT_GIT_PROTOCOL = "git"
+IPC_TRANSPORT_GIT_BRANCH = "master"
+
+# Below commit ID corresponds to "DEV.IPC-TRANSPORT.02.00.00.01"
+IPC_TRANSPORT_SRCREV = "88ea336c584ccec4b2c281cd7f75df9dff6d4edf"
+
+BRANCH = "${IPC_TRANSPORT_GIT_BRANCH}"
+SRC_URI = "${IPC_TRANSPORT_GIT_URI};protocol=${IPC_TRANSPORT_GIT_PROTOCOL};branch=${BRANCH}"
+
+SRCREV = "${IPC_TRANSPORT_SRCREV}"
+PV = "02.00.00.01"
+INC_PR = "r2"

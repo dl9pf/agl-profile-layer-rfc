@@ -1,0 +1,3 @@
+.ifexists module-router.so
+unload-module module-router
+.endif

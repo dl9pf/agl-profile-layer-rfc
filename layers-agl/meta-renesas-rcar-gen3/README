@@ -1,0 +1,14 @@
+OpenEmbedded/Yocto BSP layer for Renesas Electronics's SoCs
+==========
+This layer provides support for Renesas Electronics's platforms for use with
+AGL (Automotive Grade Linux).
+
+Maintainers: 
+	Stephane Desneux <stephane.desneux@iot.bzh>
+	Ronan Le Martret <ronan.lemartret@iot.bzh>
+
+This repository is a fork of the upstream repository maintained by Renesas:
+	Upstream layer maintainer: Takamitsu Honda <takamitsu.honda.pv@renesas.com>
+	Upstream repository: https://github.com/renesas-rcar/meta-renesas
+
+

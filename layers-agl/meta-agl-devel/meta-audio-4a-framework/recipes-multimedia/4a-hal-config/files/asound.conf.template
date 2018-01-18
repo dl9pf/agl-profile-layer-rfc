@@ -1,0 +1,531 @@
+#AGL Audio High Level ALSA configuration
+#This define 2 sounds card with 8 audio roles each
+#The alsa soft volume control name must match with the HAL Control Name
+
+# ----------------------------------------------------
+#
+# ----------------------------------------------------
+pcm.@AUDIO_DEV_NAME@ {
+    type dmix
+    slave {pcm "hw:@AUDIO_DEV_NAME_ID@"}
+    ipc_key 1001          # ipc_key should be unique to each dmix
+}
+
+# -----------------------------------------------------
+#  Register ControllerHookPlugin (ToiBeFix fullpath)
+# -----------------------------------------------------
+pcm_hook_type.CtlHookPlugin {
+    install "AlsaInstallHook"
+    lib "@INSTALL_PREFIX@/lib/policy_alsa_hook.so"
+}
+
+# ----------------------------------------------------
+#
+# ----------------------------------------------------
+pcm.Emergency_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Emergency_Volume"
+ }
+}
+
+pcm.Warning_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Warning_Volume"
+ }
+}
+
+pcm.CustomHigh_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "CustomHigh_Volume"
+ }
+}
+
+pcm.Phone_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Phone_Volume"
+ }
+}
+
+pcm.Navigation_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Navigation_Volume"
+ }
+}
+
+pcm.CustomMedium_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "CustomMedium_Volume"
+ }
+}
+
+pcm.Video_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Video_Volume"
+ }
+}
+
+pcm.Streaming_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Streaming_Volume"
+ }
+}
+
+pcm.Multimedia_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Multimedia_Volume"
+ }
+}
+
+pcm.Radio_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Radio_Volume"
+ }
+}
+
+pcm.CustomLow_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "CustomLow_Volume"
+ }
+}
+
+pcm.Fallback_Main {
+ type softvol
+ slave.pcm "@AUDIO_DEV_NAME@"
+ control{
+   name "Fallback_Volume"
+ }
+}
+
+# ----------------------------------------------------
+# Define one hooked PCM channel per Audio Roles
+# ----------------------------------------------------
+pcm.Emergency {
+    type hooks
+    slave {pcm "Emergency_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Emergency', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Warning {
+    type hooks
+    slave {pcm "Warning_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Warning', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.CustomHigh {
+    type hooks
+    slave {pcm "CustomHigh_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'CustomHigh', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Phone {
+    type hooks
+    slave {pcm "Phone_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Phone', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Navigation {
+    type hooks
+    slave {pcm "Navigation_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Navigation', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.CustomMedium {
+    type hooks
+    slave {pcm "CustomMedium_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'CustomMedium', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Video {
+    type hooks
+    slave {pcm "Video_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Video', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Streaming {
+    type hooks
+    slave {pcm "Streaming_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Streaming', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Multimedia {
+    type hooks
+    slave {pcm "Multimedia_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Multimedia', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Radio {
+    type hooks
+    slave {pcm "Radio_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Radio', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.CustomLow {
+    type hooks
+    slave {pcm "CustomLow_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'CustomLow', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}
+
+pcm.Fallback {
+    type hooks
+    slave {pcm "Fallback_Main"}
+    hooks.0 {
+        comment "Defined used hook sharelib and provide arguments/config to install func"
+        type "CtlHookPlugin"
+        hook_args {
+
+            # print few log messages (default false)
+            verbose true
+
+            # uri to audio-4a policy engine
+            uri="unix:/run/user/0/apis/ws/ahl-4a"
+
+            # timeout in ms (default 500)
+            timeout 5000
+
+            # force API synchronous mode
+            synchronous true
+
+            # api subcall to request a role
+            request {
+                stream_open "{'audio_role': 'Fallback', 'endpoint_type':'sink'}"
+                set_stream_state "{'state':'running'}"
+            }
+
+            # api subcall to request a role
+            release {
+                stream_close "{}"
+            }
+        }
+    }
+}

@@ -1,0 +1,18 @@
+index 2317d6e9..e1e897ed 100644
+--- a/ivi-shell/ivi-layout-export.h
++++ b/ivi-shell/ivi-layout-export.h
+@@ -56,12 +56,14 @@ extern "C" {
+ #endif /* __cplusplus */
+ 
+ #include <stdint.h>
++#include <limits.h>
+ 
+ #include "stdbool.h"
+ #include "compositor.h"
+ 
+ #define IVI_SUCCEEDED (0)
+ #define IVI_FAILED (-1)
++#define IVI_INVALID_ID UINT_MAX
+ 
+ struct ivi_layout_layer;
+ struct ivi_layout_screen;

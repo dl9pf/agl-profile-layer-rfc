@@ -1,0 +1,164 @@
+index 23f79dfe..f9c8010b 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -616,9 +616,7 @@ demo_clients += weston-simple-egl
+ weston_simple_egl_SOURCES = clients/simple-egl.c
+ nodist_weston_simple_egl_SOURCES =		\
+ 	protocol/xdg-shell-unstable-v6-protocol.c		\
+-	protocol/xdg-shell-unstable-v6-client-protocol.h	\
+-	protocol/ivi-application-protocol.c		\
+-	protocol/ivi-application-client-protocol.h
++	protocol/xdg-shell-unstable-v6-client-protocol.h
+ weston_simple_egl_CFLAGS = $(AM_CFLAGS) $(SIMPLE_EGL_CLIENT_CFLAGS)
+ weston_simple_egl_LDADD = $(SIMPLE_EGL_CLIENT_LIBS) -lm
+ endif
+diff --git a/clients/simple-egl.c b/clients/simple-egl.c
+index dad0f09b..07e7e785 100644
+--- a/clients/simple-egl.c
++++ b/clients/simple-egl.c
+@@ -45,8 +45,6 @@
+ #include "xdg-shell-unstable-v6-client-protocol.h"
+ #include <sys/types.h>
+ #include <unistd.h>
+-#include "ivi-application-client-protocol.h"
+-#define IVI_SURFACE_ID 9000
+ 
+ #include "shared/helpers.h"
+ #include "shared/platform.h"
+@@ -74,7 +72,6 @@ struct display {
+ 		EGLConfig conf;
+ 	} egl;
+ 	struct window *window;
+-	struct ivi_application *ivi_application;
+ 
+ 	PFNEGLSWAPBUFFERSWITHDAMAGEEXTPROC swap_buffers_with_damage;
+ };
+@@ -97,7 +94,6 @@ struct window {
+ 	struct wl_surface *surface;
+ 	struct zxdg_surface_v6 *xdg_surface;
+ 	struct zxdg_toplevel_v6 *xdg_toplevel;
+-	struct ivi_surface *ivi_surface;
+ 	EGLSurface egl_surface;
+ 	struct wl_callback *callback;
+ 	int fullscreen, opaque, buffer_size, frame_sync, delay;
+@@ -355,27 +351,22 @@ static const struct zxdg_toplevel_v6_listener xdg_toplevel_listener = {
+ };
+ 
+ static void
+-handle_ivi_surface_configure(void *data, struct ivi_surface *ivi_surface,
+-                             int32_t width, int32_t height)
++create_surface(struct window *window)
+ {
+-	struct window *window = data;
+-
+-	wl_egl_window_resize(window->native, width, height, 0, 0);
+-
+-	window->geometry.width = width;
+-	window->geometry.height = height;
++	struct display *display = window->display;
++	EGLBoolean ret;
+ 
+-	if (!window->fullscreen)
+-		window->window_size = window->geometry;
+-}
++	window->surface = wl_compositor_create_surface(display->compositor);
+ 
+-static const struct ivi_surface_listener ivi_surface_listener = {
+-	handle_ivi_surface_configure,
+-};
++	window->native =
++		wl_egl_window_create(window->surface,
++				     window->geometry.width,
++				     window->geometry.height);
++	window->egl_surface =
++		weston_platform_create_egl_surface(display->egl.dpy,
++						   display->egl.conf,
++						   window->native, NULL);
+ 
+-static void
+-create_xdg_surface(struct window *window, struct display *display)
+-{
+ 	window->xdg_surface = zxdg_shell_v6_get_xdg_surface(display->shell,
+ 							    window->surface);
+ 	zxdg_surface_v6_add_listener(window->xdg_surface,
+@@ -390,50 +381,6 @@ create_xdg_surface(struct window *window, struct display *display)
+ 
+ 	window->wait_for_configure = true;
+ 	wl_surface_commit(window->surface);
+-}
+-
+-static void
+-create_ivi_surface(struct window *window, struct display *display)
+-{
+-	uint32_t id_ivisurf = IVI_SURFACE_ID + (uint32_t)getpid();
+-	window->ivi_surface =
+-		ivi_application_surface_create(display->ivi_application,
+-					       id_ivisurf, window->surface);
+-
+-	if (window->ivi_surface == NULL) {
+-		fprintf(stderr, "Failed to create ivi_client_surface\n");
+-		abort();
+-	}
+-
+-	ivi_surface_add_listener(window->ivi_surface,
+-				 &ivi_surface_listener, window);
+-}
+-
+-static void
+-create_surface(struct window *window)
+-{
+-	struct display *display = window->display;
+-	EGLBoolean ret;
+-
+-	window->surface = wl_compositor_create_surface(display->compositor);
+-
+-	window->native =
+-		wl_egl_window_create(window->surface,
+-				     window->geometry.width,
+-				     window->geometry.height);
+-	window->egl_surface =
+-		weston_platform_create_egl_surface(display->egl.dpy,
+-						   display->egl.conf,
+-						   window->native, NULL);
+-
+-
+-	if (display->shell) {
+-		create_xdg_surface(window, display);
+-	} else if (display->ivi_application ) {
+-		create_ivi_surface(window, display);
+-	} else {
+-		assert(0);
+-	}
+ 
+ 	ret = eglMakeCurrent(window->display->egl.dpy, window->egl_surface,
+ 			     window->egl_surface, window->display->egl.ctx);
+@@ -465,8 +412,6 @@ destroy_surface(struct window *window)
+ 		zxdg_toplevel_v6_destroy(window->xdg_toplevel);
+ 	if (window->xdg_surface)
+ 		zxdg_surface_v6_destroy(window->xdg_surface);
+-	if (window->display->ivi_application)
+-		ivi_surface_destroy(window->ivi_surface);
+ 	wl_surface_destroy(window->surface);
+ 
+ 	if (window->callback)
+@@ -821,10 +766,6 @@ registry_handle_global(void *data, struct wl_registry *registry,
+ 			fprintf(stderr, "unable to load default left pointer\n");
+ 			// TODO: abort ?
+ 		}
+-	} else if (strcmp(interface, "ivi_application") == 0) {
+-		d->ivi_application =
+-			wl_registry_bind(registry, name,
+-					 &ivi_application_interface, 1);
+ 	}
+ }
+ 
+@@ -939,9 +880,6 @@ main(int argc, char **argv)
+ 	if (display.shell)
+ 		zxdg_shell_v6_destroy(display.shell);
+ 
+-	if (display.ivi_application)
+-		ivi_application_destroy(display.ivi_application);
+-
+ 	if (display.compositor)
+ 		wl_compositor_destroy(display.compositor);
+ 

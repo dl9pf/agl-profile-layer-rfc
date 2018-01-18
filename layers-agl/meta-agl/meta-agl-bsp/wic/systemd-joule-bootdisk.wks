@@ -1,0 +1,12 @@
+# short-description: Custom EFI disk image with systemd-boot
+# long-description: Creates a partitioned EFI disk image that the user
+# can directly dd to boot media. The selected bootloader is systemd-boot
+# and we do not have swap.  We assume a Joule system and provide an
+# appropriate kernel command line.
+
+part /boot --source bootimg-efi --sourceparams="loader=systemd-boot,initrd=microcode.cpio" --ondisk sda --label msdos --active --align 1024
+
+part / --source rootfs --ondisk sda --fstype=ext4 --label platform --align 1024 --use-uuid
+
+# Modify the append line here as needed to suit the environment
+bootloader --ptable gpt --timeout=5 --append="rootwait rootfstype=ext4 console=ttyS2,115200n8 console=tty0 video=efifb maxcpus=4 noxsave reboot=efi kmemleak=off"

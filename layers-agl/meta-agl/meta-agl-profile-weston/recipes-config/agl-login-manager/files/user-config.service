@@ -1,0 +1,8 @@
+[Unit]
+Description=AGL user config
+
+[Service]
+ExecStart=/bin/ln -sf @DISPLAY_XDG_RUNTIME_DIR@/wayland-0 %t/
+
+[Install]
+WantedBy=default.target

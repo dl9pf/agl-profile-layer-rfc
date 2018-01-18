@@ -1,0 +1,11 @@
+--- a/src/modules/main-volume-policy/module-main-volume-policy.c	2016-04-18 10:59:46.124086205 +0200
++++ b/src/modules/main-volume-policy/module-main-volume-policy.c	2016-04-18 11:01:31.497089360 +0200
+@@ -517,7 +517,7 @@
+             { NULL },
+         };
+ 
+-        pa_config_parse(fn, f, config_items, NULL, u);
++        pa_config_parse(fn, f, config_items, NULL, false, u);
+         pa_xfree(fn);
+         fn = NULL;
+         fclose(f);

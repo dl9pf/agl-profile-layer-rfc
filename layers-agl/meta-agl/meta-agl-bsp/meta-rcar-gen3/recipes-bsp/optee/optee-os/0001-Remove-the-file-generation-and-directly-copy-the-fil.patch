@@ -1,0 +1,41 @@
+From f9e26ca66938281a635cdac2fbeda7418488aac8 Mon Sep 17 00:00:00 2001
+From: Ronan Le Martret <ronan.lemartret@iot.bzh>
+Date: Thu, 23 Mar 2017 15:20:45 +0100
+Subject: [PATCH] Remove the file generation and directly copy the files.
+
+Signed-off-by: Ronan Le Martret <ronan.lemartret@iot.bzh>
+---
+ lib/libutee/tui/sub.mk | 12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/lib/libutee/tui/sub.mk b/lib/libutee/tui/sub.mk
+index 517cde4..d55340c 100644
+--- a/lib/libutee/tui/sub.mk
++++ b/lib/libutee/tui/sub.mk
+@@ -11,19 +11,15 @@ produce-additional-default_bold = default_bold.h
+ produce-default_bold = default_bold.c
+ depends-default_bold := scripts/render_font.py \
+ 		$(sub-dir)/fonts/amble/Amble-Bold.ttf
+-recipe-default_bold := scripts/render_font.py \
+-		--font_file $(sub-dir)/fonts/amble/Amble-Bold.ttf \
+-		--font_size 20 --font_name default_bold \
+-		--out_dir $(sub-dir-out)
++recipe-default_bold := cp $(sub-dir)/fonts/amble/default_bold.{c,h} \
++		$(sub-dir-out)
+ 
+ gensrcs-y += default_regular
+ produce-additional-default_regular = default_regular.h
+ produce-default_regular = default_regular.c
+ depends-default_regular := scripts/render_font.py \
+ 		$(sub-dir)/fonts/amble/Amble-Regular.ttf
+-recipe-default_regular := scripts/render_font.py \
+-		--font_file $(sub-dir)/fonts/amble/Amble-Regular.ttf \
+-		--font_size 20 --font_name default_regular \
+-		--out_dir $(sub-dir-out)
++recipe-default_regular := cp $(sub-dir)/fonts/amble/default_regular.{c,h} \
++		$(sub-dir-out)
+ 
+ 
+-- 
+2.6.6
+

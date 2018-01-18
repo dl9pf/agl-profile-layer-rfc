@@ -1,0 +1,3 @@
+FILESEXTRAPATHS_prepend_dra7xx-evm := "${THISDIR}/${PN}:"
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+
